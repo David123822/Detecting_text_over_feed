@@ -111,6 +111,7 @@ def sharpen_image(image):
 def detect_text_from_label():
     """
     Detects text from the image currently displayed in cam_label, sharpens it, and updates the display.
+    Also, detects the language of the text and updates the language label.
     """
     # Clear the text widget to remove any previously displayed text
     text_widget.delete('1.0', tk.END)
@@ -142,7 +143,17 @@ def detect_text_from_label():
 
     # Use Tesseract's image_to_data function to extract text and their corresponding bounding box information.
     data = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
-    pyperclip.copy(pytesseract.image_to_string(img))
+
+    # Use Tesseract's image_to_string to copy the detected text to clipboard
+    detected_text = pytesseract.image_to_string(img)
+    pyperclip.copy(detected_text)  # Copy the detected text to clipboard
+
+    # Detect the language of the detected text using the langdetect library
+    try:
+        detect_language = detect(detected_text)  # Detect the language of the text
+        language_label.config(text=f"Language: {detect_language}")  # Update the language label with detected language
+    except:
+        language_label.config(text="Language: Not detected")  # If language detection fails
 
     # If no text is detected, inform the user by adding a message to the text widget
     if len(data['text']) == 0:
@@ -179,7 +190,7 @@ def detect_text_from_label():
     # Update the label with the new image that includes the drawn bounding boxes
     cam_label.imgtk = img_tk  # Keep a reference to avoid garbage collection
     cam_label.configure(image=img_tk)  # Update the label with the new image
-
+    
 
 def detect_text_over_feed(image):
     """
@@ -273,6 +284,10 @@ cam_frame.place(x=10, y=10, width=450, height=450)
 cam_label = tk.Label(cam_frame, text="Display")
 cam_label.pack()
 
+# Label to display the detected language
+language_label = tk.Label(root, text="Language: Not detected", font=("Arial", 12))
+language_label.place(x=10, y=470)  # Place the label below the camera frame
+
 # Button to capture a picture from the camera feed
 take_picture_button = tk.Button(root, text="Take a Picture", command=take_picture, bg="blue", fg="white")
 take_picture_button.place(x=470, y=10, width=120, height=40)
@@ -281,11 +296,11 @@ take_picture_button.place(x=470, y=10, width=120, height=40)
 show_feed = tk.Button(root, text="Start feed", command=lambda: cam_feed(cam_label), bg="blue", fg="white")
 show_feed.place(x=600, y=10, width=120, height=40)
 
-# Button to detect barcodes from the displayed image
-detect_code_button = tk.Button(root, text="Detect Text", command=lambda: detect_text_from_label(), bg="green", fg="white")
+# Button to detect text from the displayed image
+detect_code_button = tk.Button(root, text="Detect Text", command=detect_text_from_label, bg="green", fg="white")
 detect_code_button.place(x=470, y=60, width=120, height=40)
 
-
+# Button to allow the user to select an image from the filesystem
 select_image_button = tk.Button(root, text="Select Image", command=choose_image, bg="blue", fg="white")
 select_image_button.place(x=470, y=110, width=120, height=40)
 
