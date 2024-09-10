@@ -146,7 +146,7 @@ def detect_text_from_label():
 
     # Use Tesseract's image_to_string to copy the detected text to clipboard
     detected_text = pytesseract.image_to_string(img)
-    pyperclip.copy(detected_text)  # Copy the detected text to clipboard
+    pyperclip.copy(pytesseract.image_to_string(pil_image))  # Copy the detected text to clipboard
 
     # Detect the language of the detected text using the langdetect library
     try:
@@ -190,7 +190,7 @@ def detect_text_from_label():
     # Update the label with the new image that includes the drawn bounding boxes
     cam_label.imgtk = img_tk  # Keep a reference to avoid garbage collection
     cam_label.configure(image=img_tk)  # Update the label with the new image
-    
+
 
 def detect_text_over_feed(image):
     """
